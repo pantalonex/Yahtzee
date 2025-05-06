@@ -1,8 +1,8 @@
-// server/ServerMain.java
 package server;
 
 import auth.AuthManager;
 import auth.CryptoUtils;
+import auth.Store;
 import network.Message;
 
 import javax.crypto.SecretKey;
@@ -17,7 +17,8 @@ public class ServerMain {
     private static final int PORT = 55555;
 
     public static void main(String[] args) throws Exception {
-        AuthManager authManager = new AuthManager();
+        Store store = new Store();                 
+        AuthManager authManager = new AuthManager(store);
         CryptoUtils.initRSA();
 
         try (ServerSocket ss = new ServerSocket(PORT)) {
