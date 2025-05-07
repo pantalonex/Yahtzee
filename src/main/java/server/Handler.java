@@ -12,8 +12,8 @@ public class Handler extends Thread {
     private final ObjectInputStream  in;
     private final ObjectOutputStream out;
 
-    private final boolean            isMulti;
-    private       ObjectOutputStream opponentOut;
+    private final boolean isMulti;
+    private ObjectOutputStream opponentOut;
 
     private final ScoreCard  card = new ScoreCard();
     private final DiceRoller dice = new DiceRoller();
@@ -25,8 +25,8 @@ public class Handler extends Thread {
     public Handler(ClientBundle bundle,
                    boolean isMulti,
                    ObjectOutputStream opponentOut) {
-        this.in   = bundle.in();
-        this.out  = bundle.out();
+        this.in = bundle.in();
+        this.out = bundle.out();
         this.isMulti = isMulti;
         this.opponentOut = opponentOut;
     }
@@ -41,7 +41,8 @@ public class Handler extends Thread {
                 send(out, Message.Type.NEXT_TURN, turn);
                 if (isMulti && opponentOut != null)
                     send(opponentOut, Message.Type.STATE,
-                         "Turno " + turn + " dell'avversario");
+                    "Turno " + turn + " dell'avversario"
+                );
 
                 int rolls = 0;
                 int[] keep = new int[5];
@@ -108,7 +109,8 @@ public class Handler extends Thread {
         send(out, Message.Type.OVER, total);
         if (isMulti && opponentOut != null)
             send(opponentOut, Message.Type.OVER,
-                 normalEnd ? "L'avversario ha chiuso con " + total
-                            : "L'avversario si è arreso");
+                normalEnd ? "L'avversario ha chiuso con " + total
+                    : "L'avversario si è arreso"
+        );
     }
 }

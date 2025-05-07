@@ -50,10 +50,8 @@ public class ServerMain {
                 in  = new ObjectInputStream(socket.getInputStream());
 
 
-                String pubB64 = Base64.getEncoder()
-                                      .encodeToString(CryptoUtils.getPublicKey().getEncoded());
+                String pubB64 = Base64.getEncoder().encodeToString(CryptoUtils.getPublicKey().getEncoded());
                 out.writeObject(new Message(Message.Type.PUBLIC_KEY, pubB64));
-
 
                 Message authMsg  = (Message) in.readObject();
                 String  creds    = CryptoUtils.decryptRSA((String) authMsg.data);

@@ -9,12 +9,12 @@ public class ScoreCalculator {
         int sum = Arrays.stream(d).sum();
 
         switch(cat){
-            case "Ones": return f[1]*1;
-            case "Twos": return f[2]*2;
-            case "Threes": return f[3]*3;
-            case "Fours": return f[4]*4;
-            case "Fives": return f[5]*5;
-            case "Sixes": return f[6]*6;
+            case "Ones":            return f[1]*1;
+            case "Twos":            return f[2]*2;
+            case "Threes":          return f[3]*3;
+            case "Fours":           return f[4]*4;
+            case "Fives":           return f[5]*5;
+            case "Sixes":           return f[6]*6;
             case "Three of a Kind": return Arrays.stream(f).anyMatch(c->c>=3)?sum:0;
             case "Four of a Kind":  return Arrays.stream(f).anyMatch(c->c>=4)?sum:0;
             case "Full House":      return has(f,3)&&has(f,2)?25:0;

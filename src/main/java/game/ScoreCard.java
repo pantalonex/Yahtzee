@@ -5,11 +5,17 @@ public class ScoreCard {
     private final Map<String,Integer> scores = new LinkedHashMap<>();
     private final String[] cats = {"Ones","Twos","Threes","Fours","Fives","Sixes",
         "Three of a Kind","Four of a Kind","Full House","Small Straight","Large Straight","Yahtzee","Chance"};
+    
     public ScoreCard(){ for(String c: cats) scores.put(c, null); }
+
     public boolean isEmpty(int idx){ return scores.get(cats[idx-1])==null; }
+
     public void setScore(int idx, int sc){ scores.put(cats[idx-1], sc); }
+
     public String getCat(int idx){ return cats[idx-1]; }
+
     public int total(){ return scores.values().stream().filter(Objects::nonNull).mapToInt(i->i).sum(); }
+    
     public void displayPossible(int[] dice) {
         System.out.println("Categorie disponibili e punteggi attuali:");
         System.out.printf("%-3s %-20s %10s %10s%n", "#", "Categoria", "Attuale", "Massimo");
