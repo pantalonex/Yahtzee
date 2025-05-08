@@ -28,8 +28,8 @@ public class ScoreCard {
                     maxPossible = i * 5;
                 } else {
                     switch (cat) {
-                        case "Three of a Kind": maxPossible = Arrays.stream(dice).sum(); break;
-                        case "Four of a Kind":  maxPossible = Arrays.stream(dice).sum(); break;
+                        case "Three of a Kind": maxPossible = 30; break;
+                        case "Four of a Kind":  maxPossible = 30; break;
                         case "Full House":      maxPossible = 25; break;
                         case "Small Straight":  maxPossible = 30; break;
                         case "Large Straight":  maxPossible = 40; break;
