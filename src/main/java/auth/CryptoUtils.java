@@ -4,19 +4,36 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
 import java.security.*;
 import java.util.Base64;
 
 public class CryptoUtils {
     private static KeyPair rsaKeyPair;
-    private static SecretKey aesKey;
-    private static IvParameterSpec iv;
+    private SecretKey aesKey;
+    private IvParameterSpec iv;
 
-    public static SecretKey getAesKey() {
+    public CryptoUtils() throws Exception {
+        KeyGenerator gen = KeyGenerator.getInstance("AES");
+        gen.init(256);
+        this.aesKey = gen.generateKey();
+
+        byte[] ivBytes = new byte[16];
+        SecureRandom.getInstanceStrong().nextBytes(ivBytes);
+        this.iv = new IvParameterSpec(ivBytes);
+    }
+
+    public CryptoUtils(byte[] aesKeyBytes, byte[] ivBytes) {
+        this.aesKey = new SecretKeySpec(aesKeyBytes, 0, aesKeyBytes.length, "AES");
+        this.iv     = new IvParameterSpec(ivBytes);
+    }
+
+    public SecretKey getAesKey() {
         return aesKey;
     }
 
-    public static void setAesKey(SecretKey key) {
+    public void setAesKey(SecretKey key) {
         aesKey = key;
     }
 
@@ -29,10 +46,6 @@ public class CryptoUtils {
     public static PublicKey getPublicKey() {
         return rsaKeyPair.getPublic();
     }
-
-    public static void setOtherPublicKey(PublicKey pk) {
-    }
-
 
     public static String encryptRSA(String data, PublicKey pk) throws Exception {
         Cipher cipher = Cipher.getInstance("RSA");
@@ -50,7 +63,7 @@ public class CryptoUtils {
     }
 
 
-    public static void initAES() throws Exception {
+    public void initAES() throws Exception {
         KeyGenerator gen = KeyGenerator.getInstance("AES");
         gen.init(256);
         aesKey = gen.generateKey();
@@ -59,14 +72,14 @@ public class CryptoUtils {
         iv = new IvParameterSpec(ivBytes);
     }
 
-    public static String encryptAES(String data) throws Exception {
+    public String encryptAES(String data) throws Exception {
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cipher.init(Cipher.ENCRYPT_MODE, aesKey, iv);
         byte[] enc = cipher.doFinal(data.getBytes());
         return Base64.getEncoder().encodeToString(iv.getIV()) + ":" + Base64.getEncoder().encodeToString(enc);
     }
 
-    public static String decryptAES(String data) throws Exception {
+    public String decryptAES(String data) throws Exception {
         String[] parts = data.split(":",2);
         IvParameterSpec ivSpec = new IvParameterSpec(Base64.getDecoder().decode(parts[0]));
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
@@ -75,11 +88,11 @@ public class CryptoUtils {
         return new String(dec);
     }
 
-    public static IvParameterSpec getIv(){ 
+    public IvParameterSpec getIv(){ 
         return iv; 
     }
     
-    public static void setIv(IvParameterSpec ivSpec){ 
+    public void setIv(IvParameterSpec ivSpec){ 
         iv = ivSpec; 
     }
 }

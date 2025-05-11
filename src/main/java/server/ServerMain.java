@@ -33,10 +33,12 @@ public class ServerMain {
     static class ConnectionWorker extends Thread {
         private final Socket socket;
         private final AuthManager auth;
+        private final CryptoUtils crypto;
 
-        ConnectionWorker(Socket socket, AuthManager auth) {
+        ConnectionWorker(Socket socket, AuthManager auth) throws Exception {
             this.socket = socket;
             this.auth   = auth;
+            this.crypto = new CryptoUtils();
         }
 
         @Override
@@ -52,6 +54,7 @@ public class ServerMain {
 
                 String pubB64 = Base64.getEncoder().encodeToString(CryptoUtils.getPublicKey().getEncoded());
                 out.writeObject(new Message(Message.Type.PUBLIC_KEY, pubB64));
+                out.flush();
 
                 Message authMsg  = (Message) in.readObject();
                 String  creds    = CryptoUtils.decryptRSA((String) authMsg.data);
@@ -63,25 +66,27 @@ public class ServerMain {
 
                 if (!ok) {
                     out.writeObject(new Message(Message.Type.ERROR, "Auth failed"));
+                    out.flush();
                     socket.close();
                     return;
                 }
                 out.writeObject(new Message(Message.Type.NEXT_TURN, "Auth OK"));
+                out.flush();
 
-                CryptoUtils.initAES();
-                SecretKey aesKey   = CryptoUtils.getAesKey();
-                IvParameterSpec iv = CryptoUtils.getIv();
+                SecretKey aesKey   = crypto.getAesKey();
+                IvParameterSpec iv = crypto.getIv();
                 String aesPayload = Base64.getEncoder().encodeToString(aesKey.getEncoded()) + ":" +
                                     Base64.getEncoder().encodeToString(iv.getIV());
                 out.writeObject(new Message(Message.Type.AES_KEY, aesPayload));
+                out.flush();
 
                 in.readObject();
 
                 Message modeMsg = (Message) in.readObject();
-                String  mode    = CryptoUtils.decryptAES((String) modeMsg.data);
+                String  mode    = crypto.decryptAES((String) modeMsg.data);
 
                 ClientBundle bundle = new ClientBundle(socket, in, out, user);
-                if ("MULTI".equalsIgnoreCase(mode)) {
+                if ("MULTI".equalsIgnoreCase(mode)) {      
                     Lobby.join(bundle);
                 } else {
                     new Handler(bundle).start();

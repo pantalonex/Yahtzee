@@ -2,6 +2,7 @@ package server;
 
 import game.*;
 import network.Message;
+import auth.AuthManager;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -48,12 +49,18 @@ public class Handler extends Thread {
                 int[] keep = new int[5];
                 int[] face = new int[5];
 
+                boolean save = false;
                 while (true) {
                     Message req = (Message) in.readObject();
 
                     switch (req.type) {
 
-                        case OVER -> { notifyGameOver(false); return; }
+                        case OVER -> { 
+                            String user = (String) req.data;
+                            AuthManager.logout(user);
+                            notifyGameOver(false); 
+                            return; 
+                        }
 
                         case ROLL -> {
                             face  = (rolls == 0) ? dice.rollAll()
@@ -73,20 +80,25 @@ public class Handler extends Thread {
 
                         case SAVE -> {
                             int idx   = (int) req.data;
-                            int score = ScoreCalculator.score(face,
-                                                              card.getCat(idx));
-                            card.setScore(idx, score);
-                            if (isMulti && opponentOut != null)
-                                send(opponentOut, Message.Type.STATE,
-                                     "Avversario salva in cat " + idx +
-                                     " per " + score + " punti");
-                            break;
+                            if (!card.isEmpty(idx)) {
+                                send(out, Message.Type.ERROR,
+                                    "Hai già salvato " + card.getCat(idx) + ", riprova");
+                            } else {
+                                int score = ScoreCalculator.score(face, card.getCat(idx));
+                                card.setScore(idx, score);
+                                send(out, Message.Type.SAVE, score);
+
+                                if (isMulti && opponentOut != null)
+                                    send(opponentOut, Message.Type.STATE,
+                                        "Avversario salva in cat " + idx + " per " + score + " punti");
+                                save = true;
+                                break;
+                            }
                         }
 
                         default -> { }
                     }
-
-                    if (req.type == Message.Type.SAVE) break;
+                    if (save) break;
                 }
             }
 

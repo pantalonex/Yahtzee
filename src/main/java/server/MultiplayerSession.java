@@ -90,8 +90,17 @@ public class MultiplayerSession implements Runnable {
                 keep = (int[]) act.data;
             } else if (act.type == Message.Type.SAVE) {
                 int idx = (int) act.data;
+                if (!card.isEmpty(idx)) {
+                    out.writeObject(new Message(
+                        Message.Type.ERROR,
+                        "Categoria già salvata, scegli un'altra"
+                    ));
+                    out.flush();
+                    continue;
+                }
                 int sc  = ScoreCalculator.score(dice, card.getCat(idx));
                 card.setScore(idx, sc);
+                out.writeObject(new Message(Message.Type.SAVE, sc));
                 oppOut.writeObject(new Message(Message.Type.OPP_SAVE,
                 new Object[]{idx, card.total()}));
                 break;
